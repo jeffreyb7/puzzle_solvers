@@ -4,9 +4,8 @@
 ### I adapted the framework found in Classic Computer Science Problems in Python by David Kopec
 ### See https://freecontent.manning.com/constraint-satisfaction-problems-in-python/ for details
 
-### I took the backtracking search function and adapted it to this use case
-
-### At this time I have only tested the code on easy problems, which it is able to solve
+### The backtracking function is unchanged, I just adapted the rest of the framework to this use case
 
 ### To solve a puzzle, enter the puzzle in puzzle design at the bottom of the file
 ### Blank cells are represented with 0
+### If you find a valid puzzle that it isn't able to solve, let me know!

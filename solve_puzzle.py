@@ -1,5 +1,32 @@
+# Here's an explanation of how it works:
+
+# The CSP class (for Constraint Satisfaction Problem) contains the following attributes:
+    # Variables is a list of the variables in the puzzle (numbered 0 to 80)
+    # Domains is a dictionary mapping each variable (key) to its possible values (list from 1 to 9)
+    # Constraints is a dictionary mapping each variable (key) to a list of its constraints
+    # Each constraint is a class object.
+    # Constraints for each variable are identical (a column constraint, a row constraint, and a sector constraint)
+
+# An assignment is created, which is a dictionary mapping each variable (key) to its assigned value (value)
+# At the start, the assignment is the base state of the puzzle
+
+# The assignment is passed into the recursive backtracking search, which does the following
+    # Check if each variable has been assigned a value (solution is found)
+    # Create a list of variables that have not been assigned a value
+    # Make a copy of the assignment dictionary called local assignment
+    # Take the first unassigned variable and assign the first number in the domain list in local assignment
+    # Check that all constraints are satisfied
+    # If so, call the backtracking search again and continue
+    # Once a constraint fails, return None
+    # None propagates back up the recursive chain until a valid state is reached
+    # Continue with the next options from that valid state
+    # Repeat until a solution is reached or no solution exists
+
 import math
 
+
+# Base class as a parent of other constraint classes
+# I don't think this is really necessary
 class Constraint:
 
     def __init__(self, variable):
@@ -8,6 +35,7 @@ class Constraint:
     def satisfied(self, assignment):
         pass
 
+# Class to check for no duplicate numbers per column
 class ColumnConstraint(Constraint):
 
     def __init__(self, variable):
@@ -31,6 +59,7 @@ class ColumnConstraint(Constraint):
 
         return True
 
+# Class to check for no duplicate numbers per row
 class RowConstraint(Constraint):
 
     def __init__(self, variable):
@@ -54,7 +83,7 @@ class RowConstraint(Constraint):
 
         return True
 
-
+# Class to check for no duplicate numbers per sector
 class SectorConstraint(Constraint):
  
     def __init__(self, variable):
@@ -148,15 +177,15 @@ class CSP:
 if __name__ == "__main__":
     
     puzzle_design = [
-            [3, 0, 4, 0, 2, 0, 0, 6, 5],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 6, 9, 8, 0, 0, 1],
-            [0, 0, 8, 9, 6, 2, 3, 0, 0],
-            [6, 0, 9, 1, 0, 7, 2, 0, 4],
-            [0, 0, 7, 5, 3, 4, 6, 0, 0],
-            [9, 0, 0, 8, 1, 6, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 9],
-            [4, 5, 0, 0, 7, 0, 8, 0, 6]
+            [4, 0, 0, 0, 1, 0, 2, 3, 7],
+            [0, 3, 0, 0, 7, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 3, 5, 0, 0],
+            [0, 0, 0, 0, 0, 4, 0, 9, 0],
+            [9, 0, 0, 0, 0, 0, 0, 0, 6],
+            [0, 2, 0, 6, 0, 0, 0, 0, 0],
+            [0, 0, 8, 3, 0, 0, 6, 0, 0],
+            [0, 0, 0, 0, 8, 0, 0, 1, 0],
+            [1, 6, 2, 0, 4, 0, 0, 0, 5]
             ]
 
     # Initialize variables and domains
@@ -200,7 +229,8 @@ if __name__ == "__main__":
         ordered_solution = {}
         for key in solution_keys_sorted:
             ordered_solution[key] = solution[key]
-        print(ordered_solution)
+        #print(ordered_solution)
+        # Create a list of lists for printing
         solution_array = []
         row_array = []
         for key, value in ordered_solution.items():
