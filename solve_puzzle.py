@@ -5,7 +5,7 @@
     # Domains is a dictionary mapping each variable (key) to its possible values (list from 1 to 9)
     # Constraints is a dictionary mapping each variable (key) to a list of its constraints
     # Each constraint is a class object.
-    # Constraints for each variable are identical (a column constraint, a row constraint, and a sector constraint)
+    # Each variable has a column constraint, a row constraint, and a sector constraint
 
 # An assignment is created, which is a dictionary mapping each variable (key) to its assigned value (value)
 # At the start, the assignment is the base state of the puzzle
@@ -14,7 +14,7 @@
     # Check if each variable has been assigned a value (solution is found)
     # Create a list of variables that have not been assigned a value
     # Make a copy of the assignment dictionary called local assignment
-    # Take the first unassigned variable and assign the first number in the domain list in local assignment
+    # Take the first unassigned variable, assign the first number in the domain list, and enter into local assignment
     # Check that all constraints are satisfied
     # If so, call the backtracking search again and continue
     # Once a constraint fails, return None
