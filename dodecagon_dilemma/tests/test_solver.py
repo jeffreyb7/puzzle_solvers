@@ -1,6 +1,7 @@
 import unittest
 from dodecagon_solver import dodecagon_solver as doso
 
+
 class TestSolver(unittest.TestCase):
 
     def setUp(self):
@@ -20,10 +21,12 @@ class TestSolver(unittest.TestCase):
         }
 
     def test_get_wheel_at_nonzero_position(self):
-        self.assertEqual(doso.get_wheel_at_position(self.wheel_config, 'F', 4), [6, 5, 7, 12, 1, 10, 11, 3, 4, 8, 9, 2])
+        self.assertEqual(doso.get_wheel_at_position(self.wheel_config, 'F', 4), [
+                         6, 5, 7, 12, 1, 10, 11, 3, 4, 8, 9, 2])
 
     def test_get_wheel_at_zero_position(self):
-        self.assertEqual(doso.get_wheel_at_position(self.wheel_config, 'L', 0), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+        self.assertEqual(doso.get_wheel_at_position(self.wheel_config, 'L', 0), [
+                         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
     def test_neighbor_constraint_when_satisfied_in_upper_left(self):
         puzzle_state = {
@@ -33,7 +36,7 @@ class TestSolver(unittest.TestCase):
         }
         constraint = doso.NeighborConstraint(0, self.wheel_config)
         self.assertTrue(constraint.satisfied(puzzle_state))
-    
+
     def test_neighbor_constraint_when_unsatisfied_in_upper_left(self):
         puzzle_state = {
             0: ('A', 0),
@@ -96,7 +99,7 @@ class TestSolver(unittest.TestCase):
         }
         constraint = doso.NeighborConstraint(11, self.wheel_config)
         self.assertFalse(constraint.satisfied(puzzle_state))
-    
+
     def test_neighbor_constraint_when_satisfied_in_middle(self):
         puzzle_state = {
             1: ('C', 6),
@@ -107,7 +110,7 @@ class TestSolver(unittest.TestCase):
         }
         constraint = doso.NeighborConstraint(5, self.wheel_config)
         self.assertTrue(constraint.satisfied(puzzle_state))
-    
+
     def test_neighbor_constraint_when_unsatisfied_in_middle(self):
         puzzle_state = {
             1: ('C', 7),
@@ -118,7 +121,7 @@ class TestSolver(unittest.TestCase):
         }
         constraint = doso.NeighborConstraint(5, self.wheel_config)
         self.assertFalse(constraint.satisfied(puzzle_state))
-    
+
     # Allows constraint to pass when wheels on the right or below have not been placed yet
     def test_neighbor_constraint_when_satisfied_in_middle_and_ahead_wheels_missing(self):
         puzzle_state = {
@@ -128,6 +131,7 @@ class TestSolver(unittest.TestCase):
         }
         constraint = doso.NeighborConstraint(5, self.wheel_config)
         self.assertTrue(constraint.satisfied(puzzle_state))
+
 
 if __name__ == '__main__':
     unittest.main()

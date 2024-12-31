@@ -7,6 +7,8 @@ NumberLocations: TypeAlias = list[int]
 NumberChoices: TypeAlias = list[int]
 
 # Base class as a parent of other constraint classes
+
+
 class Constraint:
 
     def __init__(self, variable: int):
@@ -16,11 +18,13 @@ class Constraint:
         pass
 
 # Class to check for no duplicate numbers per column
+
+
 class ColumnConstraint(Constraint):
 
     def __init__(self, variable: int):
         super().__init__(variable)
-    
+
     def satisfied(self, assignment: dict) -> bool:
         # Get col number of var
         var_col = self.variable % 9
@@ -40,11 +44,13 @@ class ColumnConstraint(Constraint):
         return True
 
 # Class to check for no duplicate numbers per row
+
+
 class RowConstraint(Constraint):
 
     def __init__(self, variable: int):
         super().__init__(variable)
-    
+
     def satisfied(self, assignment: dict) -> bool:
         # Get row number of var
         var_row = math.floor(self.variable / 9)
@@ -64,24 +70,27 @@ class RowConstraint(Constraint):
         return True
 
 # Class to check for no duplicate numbers per sector
+
+
 class SectorConstraint(Constraint):
- 
+
     def __init__(self, variable: int):
         super().__init__(variable)
-    
+
     def satisfied(self, assignment: dict) -> bool:
         # Get row, col indices of variable
         row_idx = math.floor(self.variable / 9)
         col_idx = self.variable % 9
         # Get sector number of var
-        # Sectors are numbered 0 to 8 
+        # Sectors are numbered 0 to 8
         # Sector 0 is top left
         # Sector 2 is top right
         # Sector 6 is bottom left
         # Sector 8 is bottom right
         sector_idx = (math.floor(row_idx / 3) * 3) + math.floor(col_idx / 3)
         # Get lowest var number in sector
-        lowest_var_id = (math.floor(sector_idx / 3) * 27) + ((sector_idx % 3) * 3)
+        lowest_var_id = (math.floor(sector_idx / 3) * 27) + \
+            ((sector_idx % 3) * 3)
         # Produce list of all vars in sector, starting with first 3
         base_var_to_check = [x for x in range(lowest_var_id, lowest_var_id+3)]
         final_var_to_check = []
@@ -104,7 +113,6 @@ class SectorConstraint(Constraint):
         return True
 
 
-
 class CSP:
 
     def __init__(self, variables: list[int], domains: dict):
@@ -116,7 +124,8 @@ class CSP:
         for variable in self.variables:
             self.constraints[variable] = []
             if variable not in self.domains:
-                raise LookupError("Every variable should have a domain assigned to it")
+                raise LookupError(
+                    "Every variable should have a domain assigned to it")
 
     # Adds constraints to each variable
     def add_constraint(self, constraint: Constraint):
@@ -154,7 +163,8 @@ class CSP:
                 if result is not None:
                     return result
         return None
-    
+
+
 def print_solution(solution: dict) -> None:
     solution_keys_sorted = sorted(solution.keys())
     ordered_solution = {}
@@ -172,25 +182,25 @@ def print_solution(solution: dict) -> None:
             row_array.append(value)
     for row in solution_array:
         for element in row:
-            print(element, end = ' ')
+            print(element, end=' ')
         print()
-    
+
     return
 
-        
+
 if __name__ == "__main__":
-    
+
     puzzle_design: PuzzleDesign = [
-            [4, 0, 0, 0, 1, 0, 2, 3, 7],
-            [0, 3, 0, 0, 7, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 3, 5, 0, 0],
-            [0, 0, 0, 0, 0, 4, 0, 9, 0],
-            [9, 0, 0, 0, 0, 0, 0, 0, 6],
-            [0, 2, 0, 6, 0, 0, 0, 0, 0],
-            [0, 0, 8, 3, 0, 0, 6, 0, 0],
-            [0, 0, 0, 0, 8, 0, 0, 1, 0],
-            [1, 6, 2, 0, 4, 0, 0, 0, 5]
-            ]
+        [4, 0, 0, 0, 1, 0, 2, 3, 7],
+        [0, 3, 0, 0, 7, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 3, 5, 0, 0],
+        [0, 0, 0, 0, 0, 4, 0, 9, 0],
+        [9, 0, 0, 0, 0, 0, 0, 0, 6],
+        [0, 2, 0, 6, 0, 0, 0, 0, 0],
+        [0, 0, 8, 3, 0, 0, 6, 0, 0],
+        [0, 0, 0, 0, 8, 0, 0, 1, 0],
+        [1, 6, 2, 0, 4, 0, 0, 0, 5]
+    ]
 
     # Initialize variables and domains
     # Variable ids are just numbers from 0 to 80
@@ -214,7 +224,7 @@ if __name__ == "__main__":
                 variable_id += 1
             else:
                 variable_id += 1
-    
+
     # Instantiate CSP class
     csp = CSP(variables, domains)
 
@@ -230,8 +240,3 @@ if __name__ == "__main__":
         print('No solution found')
     else:
         print_solution(solution)
-
-
-
-            
-

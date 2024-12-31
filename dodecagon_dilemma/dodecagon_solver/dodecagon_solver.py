@@ -7,8 +7,10 @@ WheelLocations: TypeAlias = list[int]
 WheelConfiguration: TypeAlias = dict
 
 # Rotates wheels and returns contents of the wheel in the new order
+
+
 def get_wheel_at_position(wheel_config: dict, wheel_id: str, position: int) -> list[int]:
-    wheel_ids = [] 
+    wheel_ids = []
     for id in wheel_config:
         wheel_ids.append(id)
     wheel_size = len(wheel_config[wheel_ids[0]])
@@ -21,10 +23,12 @@ def get_wheel_at_position(wheel_config: dict, wheel_id: str, position: int) -> l
             rotated.append(wheel_config[wheel_id][idx])
         for idx in range(0, wheel_size - position):
             rotated.append(wheel_config[wheel_id][idx])
-    
+
         return rotated
 
 # Base class as a parent of other constraint classes
+
+
 class Constraint:
 
     def __init__(self, variable: int):
@@ -34,16 +38,18 @@ class Constraint:
         pass
 
 # Class to check that a single wheel is in parity with its neighbors
+
+
 class NeighborConstraint(Constraint):
 
     def __init__(self, variable: int, wheel_config: dict):
         super().__init__(variable)
         self.wheel_config = wheel_config
-    
+
     # Assignment is the current puzzle configuration
     # Wheel_config is the order of numbers on each wheel at position 0
     def satisfied(self, assignment: dict) -> bool:
-        # Identify where neighbors are 
+        # Identify where neighbors are
         neighbors = {
             'Up': None,
             'Dn': None,
@@ -68,30 +74,35 @@ class NeighborConstraint(Constraint):
                     neighbors['Rt'] = self.variable + 1
 
         # Get orientation of the current wheel
-        current_config = get_wheel_at_position(self.wheel_config, assignment[self.variable][0], assignment[self.variable][1])
+        current_config = get_wheel_at_position(
+            self.wheel_config, assignment[self.variable][0], assignment[self.variable][1])
         # Check above
         if neighbors['Up'] is not None:
-            up_config = get_wheel_at_position(self.wheel_config, assignment[neighbors['Up']][0], assignment[neighbors['Up']][1])
+            up_config = get_wheel_at_position(
+                self.wheel_config, assignment[neighbors['Up']][0], assignment[neighbors['Up']][1])
             if up_config[6] != current_config[0]:
                 return False
         # Check below
         if neighbors['Dn'] is not None:
-            dn_config = get_wheel_at_position(self.wheel_config, assignment[neighbors['Dn']][0], assignment[neighbors['Dn']][1])
+            dn_config = get_wheel_at_position(
+                self.wheel_config, assignment[neighbors['Dn']][0], assignment[neighbors['Dn']][1])
             if dn_config[0] != current_config[6]:
                 return False
         # Check left
         if neighbors['Lt'] is not None:
-            lt_config = get_wheel_at_position(self.wheel_config, assignment[neighbors['Lt']][0], assignment[neighbors['Lt']][1])
+            lt_config = get_wheel_at_position(
+                self.wheel_config, assignment[neighbors['Lt']][0], assignment[neighbors['Lt']][1])
             if lt_config[3] != current_config[9]:
                 return False
         # Check right
         if neighbors['Rt'] is not None:
-            rt_config = get_wheel_at_position(self.wheel_config, assignment[neighbors['Rt']][0], assignment[neighbors['Rt']][1])
+            rt_config = get_wheel_at_position(
+                self.wheel_config, assignment[neighbors['Rt']][0], assignment[neighbors['Rt']][1])
             if rt_config[9] != current_config[3]:
                 return False
 
         return True
-      
+
 
 class CSP:
 
@@ -104,7 +115,8 @@ class CSP:
         for variable in self.variables:
             self.constraints[variable] = []
             if variable not in self.domains:
-                raise LookupError("Every variable should have a domain assigned to it")
+                raise LookupError(
+                    "Every variable should have a domain assigned to it")
 
     # Adds constraints to each variable
     def add_constraint(self, constraint: Constraint):
@@ -152,15 +164,17 @@ class CSP:
         return None
 
 # Solution is the same structure as assignment
+
+
 def print_solution(solution: dict) -> None:
     print(f'   {get_wheel_at_position(wheel_config, solution[0][0], solution[0][1])[0]:>2}',
-          f'       {get_wheel_at_position(wheel_config, solution[1][0], solution[1][1])[0]:>2}',    
-          f'       {get_wheel_at_position(wheel_config, solution[2][0], solution[2][1])[0]:>2}',    
+          f'       {get_wheel_at_position(wheel_config, solution[1][0], solution[1][1])[0]:>2}',
+          f'       {get_wheel_at_position(wheel_config, solution[2][0], solution[2][1])[0]:>2}',
           f'       {get_wheel_at_position(wheel_config, solution[3][0], solution[3][1])[0]:>2}')
-    
+
     print(f'{get_wheel_at_position(wheel_config, solution[0][0], solution[0][1])[9]:>2}',
-          f' {solution[0][0]}',    
-          f' {get_wheel_at_position(wheel_config, solution[0][0], solution[0][1])[3]:>2}',    
+          f' {solution[0][0]}',
+          f' {get_wheel_at_position(wheel_config, solution[0][0], solution[0][1])[3]:>2}',
           f'{get_wheel_at_position(wheel_config, solution[1][0], solution[1][1])[9]:>2}',
           f' {solution[1][0]}',
           f' {get_wheel_at_position(wheel_config, solution[1][0], solution[1][1])[3]:>2}',
@@ -170,20 +184,20 @@ def print_solution(solution: dict) -> None:
           f'{get_wheel_at_position(wheel_config, solution[3][0], solution[3][1])[9]:>2}',
           f' {solution[3][0]}',
           f' {get_wheel_at_position(wheel_config, solution[3][0], solution[3][1])[3]:>2}')
-    
+
     print(f'   {get_wheel_at_position(wheel_config, solution[0][0], solution[0][1])[6]:>2}',
-          f'       {get_wheel_at_position(wheel_config, solution[1][0], solution[1][1])[6]:>2}',    
-          f'       {get_wheel_at_position(wheel_config, solution[2][0], solution[2][1])[6]:>2}',    
+          f'       {get_wheel_at_position(wheel_config, solution[1][0], solution[1][1])[6]:>2}',
+          f'       {get_wheel_at_position(wheel_config, solution[2][0], solution[2][1])[6]:>2}',
           f'       {get_wheel_at_position(wheel_config, solution[3][0], solution[3][1])[6]:>2}')
-    
+
     print(f'   {get_wheel_at_position(wheel_config, solution[4][0], solution[4][1])[0]:>2}',
-          f'       {get_wheel_at_position(wheel_config, solution[5][0], solution[5][1])[0]:>2}',    
-          f'       {get_wheel_at_position(wheel_config, solution[6][0], solution[6][1])[0]:>2}',    
+          f'       {get_wheel_at_position(wheel_config, solution[5][0], solution[5][1])[0]:>2}',
+          f'       {get_wheel_at_position(wheel_config, solution[6][0], solution[6][1])[0]:>2}',
           f'       {get_wheel_at_position(wheel_config, solution[7][0], solution[7][1])[0]:>2}')
-    
+
     print(f'{get_wheel_at_position(wheel_config, solution[4][0], solution[4][1])[9]:>2}',
-          f' {solution[4][0]}',    
-          f' {get_wheel_at_position(wheel_config, solution[4][0], solution[4][1])[3]:>2}',    
+          f' {solution[4][0]}',
+          f' {get_wheel_at_position(wheel_config, solution[4][0], solution[4][1])[3]:>2}',
           f'{get_wheel_at_position(wheel_config, solution[5][0], solution[5][1])[9]:>2}',
           f' {solution[5][0]}',
           f' {get_wheel_at_position(wheel_config, solution[5][0], solution[5][1])[3]:>2}',
@@ -193,20 +207,20 @@ def print_solution(solution: dict) -> None:
           f'{get_wheel_at_position(wheel_config, solution[7][0], solution[7][1])[9]:>2}',
           f' {solution[7][0]}',
           f' {get_wheel_at_position(wheel_config, solution[7][0], solution[7][1])[3]:>2}')
-    
+
     print(f'   {get_wheel_at_position(wheel_config, solution[4][0], solution[4][1])[6]:>2}',
-          f'       {get_wheel_at_position(wheel_config, solution[5][0], solution[5][1])[6]:>2}',    
-          f'       {get_wheel_at_position(wheel_config, solution[6][0], solution[6][1])[6]:>2}',    
+          f'       {get_wheel_at_position(wheel_config, solution[5][0], solution[5][1])[6]:>2}',
+          f'       {get_wheel_at_position(wheel_config, solution[6][0], solution[6][1])[6]:>2}',
           f'       {get_wheel_at_position(wheel_config, solution[7][0], solution[7][1])[6]:>2}')
-    
+
     print(f'   {get_wheel_at_position(wheel_config, solution[8][0], solution[8][1])[0]:>2}',
-          f'       {get_wheel_at_position(wheel_config, solution[9][0], solution[9][1])[0]:>2}',    
-          f'       {get_wheel_at_position(wheel_config, solution[10][0], solution[10][1])[0]:>2}',    
+          f'       {get_wheel_at_position(wheel_config, solution[9][0], solution[9][1])[0]:>2}',
+          f'       {get_wheel_at_position(wheel_config, solution[10][0], solution[10][1])[0]:>2}',
           f'       {get_wheel_at_position(wheel_config, solution[11][0], solution[11][1])[0]:>2}')
-    
+
     print(f'{get_wheel_at_position(wheel_config, solution[8][0], solution[8][1])[9]:>2}',
-          f' {solution[8][0]}',    
-          f' {get_wheel_at_position(wheel_config, solution[8][0], solution[8][1])[3]:>2}',    
+          f' {solution[8][0]}',
+          f' {get_wheel_at_position(wheel_config, solution[8][0], solution[8][1])[3]:>2}',
           f'{get_wheel_at_position(wheel_config, solution[9][0], solution[9][1])[9]:>2}',
           f' {solution[9][0]}',
           f' {get_wheel_at_position(wheel_config, solution[9][0], solution[9][1])[3]:>2}',
@@ -216,23 +230,24 @@ def print_solution(solution: dict) -> None:
           f'{get_wheel_at_position(wheel_config, solution[11][0], solution[11][1])[9]:>2}',
           f' {solution[11][0]}',
           f' {get_wheel_at_position(wheel_config, solution[11][0], solution[11][1])[3]:>2}')
-    
+
     print(f'   {get_wheel_at_position(wheel_config, solution[8][0], solution[8][1])[6]:>2}',
-          f'       {get_wheel_at_position(wheel_config, solution[9][0], solution[9][1])[6]:>2}',    
-          f'       {get_wheel_at_position(wheel_config, solution[10][0], solution[10][1])[6]:>2}',    
+          f'       {get_wheel_at_position(wheel_config, solution[9][0], solution[9][1])[6]:>2}',
+          f'       {get_wheel_at_position(wheel_config, solution[10][0], solution[10][1])[6]:>2}',
           f'       {get_wheel_at_position(wheel_config, solution[11][0], solution[11][1])[6]:>2}')
 
     return
 
-        
+
 if __name__ == "__main__":
-    
+
     # Initialize wheel variables
     # Wheel_choice indicates which wheel is chosen
     # Wheel_config indicates the orientation of the wheel
     # Wheel_location indicates the location where a wheel is placed
     # Wheel_contents refers to the order of numbers on a wheel, going clockwise. Position 0 is at 12 o'clock
-    wheel_choices: WheelChoices = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+    wheel_choices: WheelChoices = ['A', 'B', 'C',
+                                   'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
     wheel_orientations: WheelOrientations = [x for x in range(0, 12)]
     wheel_locations: WheelLocations = [x for x in range(0, 12)]
     wheel_config: WheelConfiguration = {
@@ -249,7 +264,7 @@ if __name__ == "__main__":
         'K': [1, 3, 10, 12, 6, 4, 2, 7, 9, 5, 8, 11],
         'L': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     }
-    
+
     # Create domains for each variable
     # The domain refers to all the possibilities that a given location on the board can have
     domains = {}
@@ -274,6 +289,3 @@ if __name__ == "__main__":
         print('No solution found')
     else:
         print_solution(solution)
-    
-    
-
