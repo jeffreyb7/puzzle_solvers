@@ -1,15 +1,30 @@
-from typing import TypeAlias
+from abc import ABC, abstractmethod
+from typing import TypeAlias, TypedDict
+
 
 # Create types for inputs
 WheelChoices: TypeAlias = list[str]
 WheelOrientations: TypeAlias = list[int]
 WheelLocations: TypeAlias = list[int]
-WheelConfiguration: TypeAlias = dict
+WheelConfiguration = TypedDict('WheelConfiguration', {
+    'A': list[int],
+    'B': list[int],
+    'C': list[int],
+    'D': list[int],
+    'E': list[int],
+    'F': list[int],
+    'G': list[int],
+    'H': list[int],
+    'I': list[int],
+    'J': list[int],
+    'K': list[int],
+    'L': list[int]
+})
 
 # Rotates wheels and returns contents of the wheel in the new order
 
 
-def get_wheel_at_position(wheel_config: dict, wheel_id: str, position: int) -> list[int]:
+def get_wheel_at_position(wheel_config: WheelConfiguration, wheel_id: str, position: int) -> list[int]:
     wheel_ids = []
     for id in wheel_config:
         wheel_ids.append(id)
@@ -29,12 +44,13 @@ def get_wheel_at_position(wheel_config: dict, wheel_id: str, position: int) -> l
 # Base class as a parent of other constraint classes
 
 
-class Constraint:
+class Constraint(ABC):
 
     def __init__(self, position: int):
         self.position = position
 
-    def satisfied(self, assignment: dict):
+    @abstractmethod
+    def satisfied(self, assignment: dict[int, tuple[str, int]]):
         pass
 
 # Class to check that a single wheel is in parity with its neighbors
@@ -42,15 +58,15 @@ class Constraint:
 
 class NeighborConstraint(Constraint):
 
-    def __init__(self, position: int, wheel_config: dict):
+    def __init__(self, position: int, wheel_config: WheelConfiguration):
         super().__init__(position)
         self.wheel_config = wheel_config
 
     # Assignment is the current puzzle configuration
     # Wheel_config is the order of numbers on each wheel at position 0
-    def satisfied(self, assignment: dict) -> bool:
+    def satisfied(self, assignment: dict[int, tuple[str, int]]) -> bool:
         # Identify where neighbors are
-        neighbors = {
+        neighbors: dict[str, int | None] = {
             'Up': None,
             'Dn': None,
             'Lt': None,
@@ -106,11 +122,11 @@ class NeighborConstraint(Constraint):
 
 class CSP:
 
-    def __init__(self, positions: list[int], domains: dict):
+    def __init__(self, positions: list[int], domains: dict[int, tuple[list[str], list[int]]]):
 
         self.positions = positions
         self.domains = domains
-        self.constraints = {}
+        self.constraints: dict[int, list[Constraint]] = {}
 
         for position in self.positions:
             self.constraints[position] = []
@@ -127,37 +143,37 @@ class CSP:
             self.constraints[constraint.position].append(constraint)
 
     # Checks if all position constraints have been satisfied
-    def consistent(self, position: int, assignment: dict) -> bool:
+    def consistent(self, position: int, assignment: dict[int, tuple[str, int]]) -> bool:
         for constraint in self.constraints[position]:
             if not constraint.satisfied(assignment):
                 return False
         return True
 
     # Recursive method responsible for solving the puzzle
-    def backtracking_search(self, assignment: dict) -> dict | None:
+    def backtracking_search(self, assignment: dict[int, tuple[str, int]]) -> dict[int, tuple[str, int]] | None:
         # Check if each position has an assignment. If so, stop
         if len(assignment) == len(self.positions):
             return assignment
 
         # Get all positions that have not been assigned
         unassigned = [v for v in self.positions if v not in assignment]
-        # Get wheel id's that are still available
-        used_wheels = []
-        for item in assignment.values():
-            used_wheels.append(item[0])
-        unused_wheels = [w for w in self.domains[0][0] if w not in used_wheels]
 
-        # Get every possible domain value of the first unassigned position
-        first_var = unassigned[0]
-        for wheel_choice in unused_wheels:
-            if wheel_choice in assignment:
-                continue
-            for wheel_config in self.domains[first_var][1]:
+        # Choose the first unassigned position
+        this_position = unassigned[0]
+
+        # Get wheel id's that are still available for that position
+        used_wheels: list[str] = []
+        for item in list(assignment.values()):
+            used_wheels.append(item[0])
+        available_wheels = [
+            w for w in self.domains[this_position][0] if w not in used_wheels]
+        for wheel_choice in available_wheels:
+            for wheel_config in self.domains[this_position][1]:
                 local_assignment = assignment.copy()
-                local_assignment[first_var] = (wheel_choice, wheel_config)
+                local_assignment[this_position] = (wheel_choice, wheel_config)
                 # Check if constraints are satisfied.
                 # If so, continue to recurse
-                if self.consistent(first_var, local_assignment):
+                if self.consistent(this_position, local_assignment):
                     result = self.backtracking_search(local_assignment)
                     if result is not None:
                         return result
@@ -166,7 +182,7 @@ class CSP:
 # Solution is the same structure as assignment
 
 
-def print_solution(solution: dict) -> None:
+def print_solution(wheel_config: WheelConfiguration, solution: dict[int, tuple[str, int]]) -> None:
     print(f'   {get_wheel_at_position(wheel_config, solution[0][0], solution[0][1])[0]:>2}',
           f'       {get_wheel_at_position(wheel_config, solution[1][0], solution[1][1])[0]:>2}',
           f'       {get_wheel_at_position(wheel_config, solution[2][0], solution[2][1])[0]:>2}',
@@ -267,14 +283,14 @@ if __name__ == "__main__":
 
     # Create domains for each position
     # The domain refers to all the possibilities that a given location on the board can have
-    domains = {}
+    domains: dict[int, tuple[list[str], list[int]]] = {}
     for location in wheel_locations:
-        domains[location] = [wheel_choices, wheel_orientations]
+        domains[location] = (wheel_choices, wheel_orientations)
 
     # Assignment tracks the current state of the board as the puzzle is being solved
     # Keys are the same as wheel_locations
     # Values are a tuple of (wheel_choice, wheel_orientation)
-    assignment = {}
+    assignment: dict[int, tuple[str, int]] = {}
 
     # Instantiate CSP class
     csp = CSP(wheel_locations, domains)
@@ -288,4 +304,4 @@ if __name__ == "__main__":
     if solution is None:
         print('No solution found')
     else:
-        print_solution(solution)
+        print_solution(wheel_config, solution)

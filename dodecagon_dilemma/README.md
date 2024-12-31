@@ -10,7 +10,7 @@
       - 8 to 11 is the third row
     - Domains, a dictionary mapping each position (key) to its possible values
       - Possible values in this case are a combination of a wheel and an orientation
-      - Therefore each value is an array where:
+      - Each value is a tuple where:
         - The first member is a list of all the wheel choices
         - The second member is a list of all wheel orientations (list of 0 to 11)
             - Wheel orientation is relative to where the 1 is on each wheel
