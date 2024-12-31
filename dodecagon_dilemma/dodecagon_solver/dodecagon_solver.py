@@ -31,8 +31,8 @@ def get_wheel_at_position(wheel_config: dict, wheel_id: str, position: int) -> l
 
 class Constraint:
 
-    def __init__(self, variable: int):
-        self.variable = variable
+    def __init__(self, position: int):
+        self.position = position
 
     def satisfied(self, assignment: dict):
         pass
@@ -42,8 +42,8 @@ class Constraint:
 
 class NeighborConstraint(Constraint):
 
-    def __init__(self, variable: int, wheel_config: dict):
-        super().__init__(variable)
+    def __init__(self, position: int, wheel_config: dict):
+        super().__init__(position)
         self.wheel_config = wheel_config
 
     # Assignment is the current puzzle configuration
@@ -57,25 +57,25 @@ class NeighborConstraint(Constraint):
             'Rt': None
         }
         # Identify location of wheel above, if it exists
-        if self.variable >= 4 and self.variable <= 11:
-            neighbors['Up'] = self.variable - 4
+        if self.position >= 4 and self.position <= 11:
+            neighbors['Up'] = self.position - 4
         # Identify location of wheel below, if it exists and has been assigned
-        if self.variable >= 0 and self.variable <= 7:
-            if self.variable + 4 in assignment:
-                if assignment[self.variable + 4] is not None:
-                    neighbors['Dn'] = self.variable + 4
+        if self.position >= 0 and self.position <= 7:
+            if self.position + 4 in assignment:
+                if assignment[self.position + 4] is not None:
+                    neighbors['Dn'] = self.position + 4
         # Identify location of wheel to the left, if it exists
-        if self.variable not in [0, 4, 8]:
-            neighbors['Lt'] = self.variable - 1
+        if self.position not in [0, 4, 8]:
+            neighbors['Lt'] = self.position - 1
         # Identify location of wheel to the right, if it exists and has been assigned
-        if self.variable not in [3, 7, 11]:
-            if self.variable + 1 in assignment:
-                if assignment[self.variable + 1] is not None:
-                    neighbors['Rt'] = self.variable + 1
+        if self.position not in [3, 7, 11]:
+            if self.position + 1 in assignment:
+                if assignment[self.position + 1] is not None:
+                    neighbors['Rt'] = self.position + 1
 
         # Get orientation of the current wheel
         current_config = get_wheel_at_position(
-            self.wheel_config, assignment[self.variable][0], assignment[self.variable][1])
+            self.wheel_config, assignment[self.position][0], assignment[self.position][1])
         # Check above
         if neighbors['Up'] is not None:
             up_config = get_wheel_at_position(
@@ -106,48 +106,48 @@ class NeighborConstraint(Constraint):
 
 class CSP:
 
-    def __init__(self, variables: list[int], domains: dict):
+    def __init__(self, positions: list[int], domains: dict):
 
-        self.variables = variables
+        self.positions = positions
         self.domains = domains
         self.constraints = {}
 
-        for variable in self.variables:
-            self.constraints[variable] = []
-            if variable not in self.domains:
+        for position in self.positions:
+            self.constraints[position] = []
+            if position not in self.domains:
                 raise LookupError(
-                    "Every variable should have a domain assigned to it")
+                    "Every position should have a domain assigned to it")
 
-    # Adds constraints to each variable
+    # Adds constraints to each position
     def add_constraint(self, constraint: Constraint):
 
-        if constraint.variable not in self.variables:
-            raise LookupError("Variable in constraint not in CSP")
+        if constraint.position not in self.positions:
+            raise LookupError("Position in constraint not in CSP")
         else:
-            self.constraints[constraint.variable].append(constraint)
+            self.constraints[constraint.position].append(constraint)
 
-    # Checks if all variable constraints have been satisfied
-    def consistent(self, variable: int, assignment: dict) -> bool:
-        for constraint in self.constraints[variable]:
+    # Checks if all position constraints have been satisfied
+    def consistent(self, position: int, assignment: dict) -> bool:
+        for constraint in self.constraints[position]:
             if not constraint.satisfied(assignment):
                 return False
         return True
 
     # Recursive method responsible for solving the puzzle
     def backtracking_search(self, assignment: dict) -> dict | None:
-        # Check if each variable has an assignment. If so, stop
-        if len(assignment) == len(self.variables):
+        # Check if each position has an assignment. If so, stop
+        if len(assignment) == len(self.positions):
             return assignment
 
-        # Get all variables that have not been assigned
-        unassigned = [v for v in self.variables if v not in assignment]
+        # Get all positions that have not been assigned
+        unassigned = [v for v in self.positions if v not in assignment]
         # Get wheel id's that are still available
         used_wheels = []
         for item in assignment.values():
             used_wheels.append(item[0])
         unused_wheels = [w for w in self.domains[0][0] if w not in used_wheels]
 
-        # Get every possible domain value of the first unassigned variable
+        # Get every possible domain value of the first unassigned position
         first_var = unassigned[0]
         for wheel_choice in unused_wheels:
             if wheel_choice in assignment:
@@ -241,7 +241,7 @@ def print_solution(solution: dict) -> None:
 
 if __name__ == "__main__":
 
-    # Initialize wheel variables
+    # Initialize wheel positions
     # Wheel_choice indicates which wheel is chosen
     # Wheel_config indicates the orientation of the wheel
     # Wheel_location indicates the location where a wheel is placed
@@ -265,7 +265,7 @@ if __name__ == "__main__":
         'L': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
     }
 
-    # Create domains for each variable
+    # Create domains for each position
     # The domain refers to all the possibilities that a given location on the board can have
     domains = {}
     for location in wheel_locations:
