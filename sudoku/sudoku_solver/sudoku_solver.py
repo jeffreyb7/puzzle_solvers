@@ -1,47 +1,27 @@
-# Here's an explanation of how it works:
-
-# The CSP class (for Constraint Satisfaction Problem) contains the following attributes:
-    # Variables is a list of the variables in the puzzle (numbered 0 to 80)
-    # Domains is a dictionary mapping each variable (key) to its possible values (list from 1 to 9)
-    # Constraints is a dictionary mapping each variable (key) to a list of its constraints
-    # Each constraint is a class object.
-    # Each variable has a column constraint, a row constraint, and a sector constraint
-
-# An assignment is created, which is a dictionary mapping each variable (key) to its assigned value (value)
-# At the start, the assignment is the base state of the puzzle
-
-# The assignment is passed into the recursive backtracking search, which does the following
-    # Check if each variable has been assigned a value (solution is found)
-    # Create a list of variables that have not been assigned a value
-    # Make a copy of the assignment dictionary called local assignment
-    # Take the first unassigned variable, assign the first number in the domain list, and enter into local assignment
-    # Check that all constraints are satisfied
-    # If so, call the backtracking search again and continue
-    # Once a constraint fails, return None
-    # None propagates back up the recursive chain until a valid state is reached
-    # Continue with the next options from that valid state
-    # Repeat until a solution is reached or no solution exists
-
 import math
+from typing import TypeAlias
 
+# Create types for inputs
+PuzzleDesign: TypeAlias = list[list[int]]
+NumberLocations: TypeAlias = list[int]
+NumberChoices: TypeAlias = list[int]
 
 # Base class as a parent of other constraint classes
-# I don't think this is really necessary
 class Constraint:
 
-    def __init__(self, variable):
+    def __init__(self, variable: int):
         self.variable = variable
 
-    def satisfied(self, assignment):
+    def satisfied(self, assignment: dict):
         pass
 
 # Class to check for no duplicate numbers per column
 class ColumnConstraint(Constraint):
 
-    def __init__(self, variable):
+    def __init__(self, variable: int):
         super().__init__(variable)
     
-    def satisfied(self, assignment):
+    def satisfied(self, assignment: dict) -> bool:
         # Get col number of var
         var_col = self.variable % 9
         # List all vars in column
@@ -62,10 +42,10 @@ class ColumnConstraint(Constraint):
 # Class to check for no duplicate numbers per row
 class RowConstraint(Constraint):
 
-    def __init__(self, variable):
+    def __init__(self, variable: int):
         super().__init__(variable)
     
-    def satisfied(self, assignment):
+    def satisfied(self, assignment: dict) -> bool:
         # Get row number of var
         var_row = math.floor(self.variable / 9)
         # List all vars in row
@@ -86,10 +66,10 @@ class RowConstraint(Constraint):
 # Class to check for no duplicate numbers per sector
 class SectorConstraint(Constraint):
  
-    def __init__(self, variable):
+    def __init__(self, variable: int):
         super().__init__(variable)
     
-    def satisfied(self, assignment):
+    def satisfied(self, assignment: dict) -> bool:
         # Get row, col indices of variable
         row_idx = math.floor(self.variable / 9)
         col_idx = self.variable % 9
@@ -127,7 +107,7 @@ class SectorConstraint(Constraint):
 
 class CSP:
 
-    def __init__(self, variables, domains):
+    def __init__(self, variables: list[int], domains: dict):
 
         self.variables = variables
         self.domains = domains
@@ -138,26 +118,28 @@ class CSP:
             if variable not in self.domains:
                 raise LookupError("Every variable should have a domain assigned to it")
 
-    def add_constraint(self, constraint):
+    # Adds constraints to each variable
+    def add_constraint(self, constraint: Constraint):
 
         if constraint.variable not in self.variables:
             raise LookupError("Variable in constraint not in CSP")
         else:
             self.constraints[variable].append(constraint)
 
-    def consistent(self, variable, assignment):
+    # Checks if all variable constraints have been satisfied
+    def consistent(self, variable: int, assignment: dict) -> bool:
         for constraint in self.constraints[variable]:
             if not constraint.satisfied(assignment):
                 return False
         return True
 
-
-    def backtracking_search(self, assignment):
+    # Recursive method responsible for solving the puzzle
+    def backtracking_search(self, assignment: dict) -> dict | None:
         # Check if each variable has an assignment. If so, stop
         if len(assignment) == len(self.variables):
             return assignment
 
-        # Get all variables in the CSP but not in the assignment
+        # Get all variables that have not been assigned
         unassigned = [v for v in self.variables if v not in assignment]
 
         # Get every possible domain value of the first unassigned variable
@@ -172,11 +154,33 @@ class CSP:
                 if result is not None:
                     return result
         return None
+    
+def print_solution(solution: dict) -> None:
+    solution_keys_sorted = sorted(solution.keys())
+    ordered_solution = {}
+    for key in solution_keys_sorted:
+        ordered_solution[key] = solution[key]
+    # Create a list of lists for printing
+    solution_array = []
+    row_array = []
+    for key, value in ordered_solution.items():
+        if (key + 1) % 9 == 0:
+            row_array.append(value)
+            solution_array.append(row_array)
+            row_array = []
+        else:
+            row_array.append(value)
+    for row in solution_array:
+        for element in row:
+            print(element, end = ' ')
+        print()
+    
+    return
 
         
 if __name__ == "__main__":
     
-    puzzle_design = [
+    puzzle_design: PuzzleDesign = [
             [4, 0, 0, 0, 1, 0, 2, 3, 7],
             [0, 3, 0, 0, 7, 0, 0, 0, 0],
             [0, 0, 1, 0, 0, 3, 5, 0, 0],
@@ -192,11 +196,12 @@ if __name__ == "__main__":
     # Variable ids are just numbers from 0 to 80
     # Var 0 is upper left of puzzle
     # Var 80 is bottom right of puzzle
-    variables = [x for x in range(0, 81)]
+    variables: NumberLocations = [x for x in range(0, 81)]
+    number_choices: NumberChoices = [x for x in range(1, 10)]
     # Create domains for each variable
     domains = {}
     for variable in variables:
-        domains[variable] = [x for x in range(1, 10)]
+        domains[variable] = number_choices
 
     # Create initial assignment dictionary
     # This maps variable to value for the initial state of the puzzle
@@ -224,26 +229,7 @@ if __name__ == "__main__":
     if solution is None:
         print('No solution found')
     else:
-        # Sort dictionary in ascending order
-        solution_keys_sorted = sorted(solution.keys())
-        ordered_solution = {}
-        for key in solution_keys_sorted:
-            ordered_solution[key] = solution[key]
-        #print(ordered_solution)
-        # Create a list of lists for printing
-        solution_array = []
-        row_array = []
-        for key, value in ordered_solution.items():
-            if (key + 1) % 9 == 0:
-                row_array.append(value)
-                solution_array.append(row_array)
-                row_array = []
-            else:
-                row_array.append(value)
-        for row in solution_array:
-            for element in row:
-                print(element, end = ' ')
-            print()
+        print_solution(solution)
 
 
 
